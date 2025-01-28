@@ -1,0 +1,185 @@
+#Gramatika hau aposizioen bigarren zatia markatzeko (bigarren etiketa)egin da (2012-06-07). Hortaz beahrrezkoa da lehendabiziko etiketa jartzen duengramtik lehnego jartzea.  
+
+
+DELIMITERS = "<$.>" "<$?>" "<$!>"; 
+
+#SETS
+
+
+#pertsonak
+LIST ENTI_PER =  ENTI_PER ;
+LIST ENTI_HAS_PER = ENTI_HAS_PER ;
+LIST  ENTI_BUK_PER =  ENTI_BUK_PER ;
+#lekuak
+LIST ENTI_LOC =  ENTI_LOC ;
+LIST ENTI_HAS_LOC = ENTI_HAS_LOC ;
+LIST  ENTI_BUK_LOC =  ENTI_BUK_LOC ;
+#erakundeak
+LIST ENTI_ORG =  ENTI_ORG ;
+LIST ENTI_HAS_ORG = ENTI_HAS_ORG ;
+LIST  ENTI_BUK_ORG =  ENTI_BUK_ORG ;
+
+#gramatika kategorial, futzio sintaktikoak...
+LIST IZE = IZE ;
+LIST ARR = ARR ;
+LIST NEXT_KM = @KM> ;
+#LIST ENTI_ORO = ENTI ;
+LIST SIH = %SIH ;
+LIST NEXT_IZLG = @IZLG> ;
+LIST FS_OSOAK = @SUBJ @ADLG @OBJ @ZOBJ;# @PRED ;
+LIST PRED = @PRED ;
+LIST LOT =  @PJ ;
+LIST POS = GEN GEL ; # Izenlagunaren listaren ere baliagarria izan litzateke
+LIST ADJ = ADJ;
+LIST GEL = GEL ; 
+LIST INE = INE ;
+LIST ALA = ALA ;
+LIST BEREIZ = BEREIZ ;
+LIST LIB = LIB ;
+
+
+# aurreko gramatikatik heredatutako etiketak
+
+LIST APO = ]PER_APOS1 ]LOC_APOS1 ]ORG_APOS1 ;
+LIST APO_KONTRAKO = ]PER_APOS1_ENTI_ATZE  ]LOC_APOS1_ENTI_ATZE ]ORG_APOS1_ENTI_ATZE ;
+LIST  APOS_EGON = ]APOS1_EGON ;
+
+
+# puntu kardinalak
+
+LIST PUNT_KARDI = "mendebalde" "ekialde" "iparralde" "hegoalde";
+
+
+#MAPPINGS
+
+#orokorra probatzeko
+
+MAP ([APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 PUNT_KARDI) (-1 APO) (NOT 1 ADJ); # postposizioak markatuta egongo balera ez post, edo horrelako zerbait gehitu # londres mendebalean... ez markatzeko
+
+#  hasiera markatzeko erregela orokorra
+MAP ([APOS_HAS) TARGET  (IZE) IF (0 ENTI_HAS_ORG OR ENTI_HAS_LOC OR ENTI_HAS_PER)(0C NEXT_KM) (1 APO) (NOT -1 LOT OR POS); # (NOT 0C FS_OSOAK) gehitua eta kenduta
+
+
+MAP ([APOS_HAS) TARGET  (IZB) IF (0 ENTI_PER) (0C SIH OR NEXT_KM) (1 APO); #Luis uranga presidenteak bezzalako ize-abizenak harrapatzeko
+
+MAP ([APOS_HAS) TARGET  (SIH) IF (0C NEXT_IZLG)  (1C APO); # ormaiztegiko zumalakarrrregi museoa
+
+# SINTAGAMA KOORDINATUAK HARRAPATZEKO ERREGELAK
+
+#KORDINAKTU BAKUNAK arakil eta salado ibaien urak; peru eta mikel haurrak
+MAP ([APOS_HAS) TARGET  (IZB) IF (0 ENTI_PER OR ENTI_ORG) (NOT 0C FS_OSOAK) (NOT 0C POS)  (0C NEXT_KM) (1 LOT) (2 APO); # oC POS
+
+# pp eta psoe alderdiak 
+
+MAP ([APOS_HAS) TARGET  (LIB) IF (0 ENTI_LOC) (0C NEXT_KM) (1 LOT) (2 APO);
+
+
+# baltasar garzon entzutegi nazionaleko epaileak 
+
+MAP ([APOS2) TARGET  (IZE) IF (0 ARR)  (-2 IZE + ARR)(-1C ENTI_BUK_ORG OR ENTI_BUK_LOC OR ENTI_BUK_PER )  (-3 APO);
+
+#Aposizioaren bigarren partea I+ADJ lehehndakari berriak
+
+
+
+#  martine Aubry ministri ohiaren aita
+
+MAP ([APOS2) TARGET  (ADJ) IF (0 ARR) (NOT 0C GEL) (-1 IZE + ARR)(-1C NEXT_KM)  (-2 APO); #(NOT 0C POS)
+
+
+MAP ([APOS_HAS) TARGET (IZE) IF (0 ARR)(0C NEXT_KM)(NOT 0 PUNT_KARDI) (1 ADJ + ARR)  (-1 APO);
+
+
+#MAP ([APOS_HAS>) TARGET (IZE) IF (0 ARR)(0C NEXT_KM)(NOT 0 PUNT_KARDI) (1 ADJ + ARR) (1C POS)  (-1 APO) (2 IZE);
+
+
+#######################################
+
+#KONTRAKO EGITURA - Egiptoko presidente Hosni MubaraK
+
+#Hasiera (Denak ezinezkoa hartzea)
+MAP ([APOS2_AURRE_HAS) TARGET (IZE) IF (0C GEL) (1 IZE + ARR) (2C ENTI_PER OR ENTI_ORG OR ENTI_LOC) (2 APO_KONTRAKO);
+#MAP ([APOS2_AURRE_HAS) TARGET (IZB  OR LIB) IF (0C GEL) (1 IZE + ARR) (2C ENTI_PER OR ENTI_ORG OR ENTI_LOC) (2 APO_KONTRAKO);
+
+
+MAP ([APOS2_AURRE_HAS) TARGET (IZE) IF (0C GEL) (1 IZE + ARR)(3C ENTI_BUK_PER OR ENTI_BUK_ORG OR ENTI_BUK_LOC) (3 APO_KONTRAKO);
+#MAP ([APOS2_AURRE_HAS) TARGET (IZB OR LIB) IF (0C GEL) (1 IZE + ARR)(3C ENTI_BUK_PER OR ENTI_BUK_ORG OR ENTI_BUK_LOC) (3 APO_KONTRAKO);
+
+
+
+
+#burua(izen arrunta) # -1 euskal| autonomia erkidego
+MAP ([APOS2_AURRE)  TARGET (IZE) IF (0 ARR)(0C NEXT_KM) (1C ENTI_PER OR ENTI_ORG OR ENTI_LOC) (1 APO_KONTRAKO) (NOT -1 ENTI_PER OR ENTI_ORG OR ENTI_LOC);
+
+
+MAP ([APOS2_AURRE)  TARGET (IZE) IF (0 ARR)(0C NEXT_KM) (1C ENTI_HAS_PER OR  ENTI_HAS_ORG OR ENTI_HAS_LOC) (2C ENTI_BUK_PER OR ENTI_BUK_ORG OR ENTI_BUK_LOC) (2 APO_KONTRAKO) (NOT -1 ENTI_PER OR ENTI_ORG OR ENTI_LOC);
+
+
+#kirol zuzendari julian[gorospe
+
+MAP ([APOS1_AURRE_HAS)TARGET (IZE) IF (0C NEXT_KM) (0 ENTI_HAS_PER OR  ENTI_HAS_ORG OR ENTI_HAS_LOC)(2 APO_KONTRAKO);
+
+
+#David Tribme lehen-ministroaren[
+
+MAP ([APOS2_AURRE)  TARGET (IZE) IF (0 ARR)(-1C NEXT_KM) (-1 APO_KONTRAKO)(-1C ENTI_PER OR ENTI_ORG OR ENTI_LOC) (-2C ENTI_PER OR ENTI_ORG OR ENTI_LOC) ;
+
+
+
+
+
+# bruselan (belgika) egitura harrapatzeko -> brusela belgikan dago sortzeko
+
+
+MAP ([APOS2_EGON) TARGET  (ENTI_LOC) IF (0C LIB)(1 BEREIZ) (-1 BEREIZ) (-2C APOS_EGON);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######################################333
+
+
+# bukaerako etiketa SAILKATUTA jarri nahi bada, hurrengo erregelak deskomentatu, sinpleak bakarrik
+
+
+#PERTSONA ENTITATEAK
+
+#MAP ([PER_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_PER) OR (ENTI_PER) );#ondo
+#MAP ([PER_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_PER OR ENTI_PER ); #PROBATU
+##MAP ([APOS2) TARGET  (IZE) IF (0 ARR) (-1 @IZLG>) (-2  ENTI);  #Oso orokorra (-2 OR -3 ENTI, nola adierazi?) AZTERTZEOK
+
+#LEKU ENTITATEAK 
+
+
+#MAP ([LOC_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_LOC) OR (ENTI_LOC) );
+#MAP ([LOC_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_LOC OR ENTI_LOC );
+
+
+#ERAKUNDE ENTITATEAK
+
+
+
+#MAP ([ORG_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_ORG) OR (ENTI_ORG) );
+#MAP ([ORG_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_ORG OR ENTI_ORG );
+
+
+
+
+
+
+
+
+
+
+END
