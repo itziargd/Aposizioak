@@ -1,0 +1,172 @@
+#Aposizioak ezagutzeko eta markatzeko gramatika (2012-06-04)
+# testuen sinplifikaziaori begira egina, hoanko egitura hauek harrapatzeko: Garzon epaileak; Itziar Idiazabal irakasleak 
+#bi etiketa: ]APOS1 eta ]APOS2. Apos: aposizio osagaiak. Ondoren zehaztu dira enritatak sailkatuz
+#Zatien gainean egin behar da
+# erregela baten bertsio asko, cg ez zebileko (makinaren arazaoa), baina guk uste gure gramatikaren errua zela
+
+
+# gramatika honek aposizioa hautagaiak markatzen ditu, hurren grmatikak esango digu zein den benetako aposizioa
+
+DELIMITERS = "<$.>" "<$?>" "<$!>"; 
+
+#SETS
+
+
+#pertsonak
+LIST ENTI_PER =  ENTI_PER ;
+LIST ENTI_HAS_PER = ENTI_HAS_PER ;
+LIST  ENTI_BUK_PER =  ENTI_BUK_PER ;
+#lekuak
+LIST ENTI_LOC =  ENTI_LOC ;
+LIST ENTI_HAS_LOC = ENTI_HAS_LOC ;
+LIST  ENTI_BUK_LOC =  ENTI_BUK_LOC ;
+#erakundeak
+LIST ENTI_ORG =  ENTI_ORG ;
+LIST ENTI_HAS_ORG = ENTI_HAS_ORG ;
+LIST  ENTI_BUK_ORG =  ENTI_BUK_ORG ;
+
+#gramatika kategorial, futzio sintaktikoak...
+LIST IZE = IZE ;
+LIST ARR = ARR ;
+LIST NEXT_KM = @KM> ;
+#LIST ENTI_ORO = ENTI ;
+LIST SIH = %SIH ;
+LIST NEXT_IZLG = @IZLG> ;
+LIST FS_OSOAK = @SUBJ @ADLG @OBJ @ZOBJ;# @PRED ;
+LIST PRED = @PRED ;
+LIST ADJ = ADJ;
+LIST INE = INE ;
+LIST ALA = ALA ;
+LIST BEREIZ = BEREIZ ;
+LIST LIB = LIB ;
+
+#MAPPINGS
+
+#####################################################################################################
+#######HASIERAKO PROBAK
+#######1 orokorra;laugarrenean zehatza; probatu!!
+#######MAP (]APOS1) TARGET  (ENTI_PER) IF (0 @KM>) (1  IZE + ARR);
+#######MAP (]APOS1) TARGET  (ENTI_PER) IF (0 NEXT_KM)   (1  IZE + ARR); #ondo
+#######2 orokorra;laugarrenean zehatza; probatu!!
+#######MAP (]APOS1) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (0 @KM>) (1  IZE + ARR); 
+#######MAP (]APOS1) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (0 NEXT_KM)(NOT 0 SIH) (1  IZE + ARR); #ondo
+#########
+#####################################################################################################
+
+#PERTSONA ENTITATEAK
+
+
+
+# Aposizioaren lehendabizkiko partea
+MAP (]PER_APOS1) TARGET  (ENTI_PER) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (NOT 1 NEXT_KM); #(1  FS_OSOAK
+MAP (]PER_APOS1) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (0 NEXT_KM)  (1  IZE + ARR) (NOT 1 NEXT_KM); #(NOT 0 NEXT_IZLG) (1  FS_OSOAK); # baltasar garzon entzutegi nazionaleko epaileak entzutegi-n ez jartzeko
+
+
+# PER_APOS2 jartzeko, agina bigarren grmatika batena jarri beharko litzateke. beste GRaMATIKA BATegin!!!
+
+###MAP (]PER_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_PER) OR (ENTI_PER) );#ondo
+###MAP (]PER_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_PER OR ENTI_PER ); #PROBATU
+#MAP (]APOS2) TARGET  (IZE) IF (0 ARR) (-1 @IZLG>) (-2  ENTI);  #Oso orokorra (-2 OR -3 ENTI, nola adierazi?) AZTERTZEOK
+
+#LEKU ENTITATEAK 
+
+#bilbo hiria
+
+MAP (]LOC_APOS1) TARGET  (ENTI_LOC) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (NOT 1 NEXT_KM);
+MAP (]LOC_APOS1) TARGET (ENTI_BUK_LOC) IF (-1 ENTI_HAS_LOC) (0 NEXT_KM)  (1  IZE + ARR) (NOT 1 NEXT_KM);
+
+###MAP (]LOC_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_LOC) OR (ENTI_LOC) );
+####MAP (]LOC_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_LOC OR ENTI_LOC );
+
+
+#ERAKUNDE ENTITATEAK
+
+
+MAP (]ORG_APOS1) TARGET  (ENTI_ORG) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (NOT 1 NEXT_KM);
+MAP (]ORG_APOS1) TARGET (ENTI_BUK_ORG) IF (-1 ENTI_HAS_ORG) (0C NEXT_KM)  (1  IZE + ARR) (NOT 1 NEXT_KM);
+
+###MAP (]ORG_APOS2) TARGET  (IZE) IF (0 ARR) (-1 (ENTI_BUK_ORG) OR (ENTI_ORG) );
+###MAP (]ORG_APOS2) TARGET  (IZE) IF (0 ARR) (NOT 0 NEXT_KM) (0 FS_OSOAK) (NOT 0 PRED) (-1 ENTI_BUK_ORG OR ENTI_ORG );
+# gramtikaren emaitzan kontuan hartu behar diren bakarrrak 1 eta bi parteak dituzten etiketak dira, hemengo bigarren partea deskomentatzen bada, (beste gramatika pasa gabe)
+
+
+
+
+#Aposizioaren bigarren partea I+ADJ denean apo1 marka jartzeko (beste sailera zabaldu)
+
+# pertsona
+
+MAP (]PER_APOS1) TARGET  (ENTI_PER) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (2 ADJ); 
+
+MAP (]PER_APOS1) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (0 NEXT_KM)  (1  IZE + ARR) (2 ADJ); 
+
+#lekua
+
+MAP (]LOC_APOS1) TARGET  (ENTI_LOC) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (2 ADJ);
+
+MAP (]LOC_APOS1) TARGET (ENTI_BUK_LOC) IF (-1 ENTI_HAS_LOC) (0 NEXT_KM)  (1  IZE + ARR) (2 ADJ);
+
+
+#erakundea
+
+MAP (]ORG_APOS1) TARGET  (ENTI_ORG) IF (0C NEXT_KM) (NOT 0 SIH) (1  IZE + ARR) (2 ADJ);
+
+MAP (]ORG_APOS1) TARGET (ENTI_BUK_ORG) IF (-1 ENTI_HAS_ORG) (0 NEXT_KM)  (1  IZE + ARR) (2 ADJ);
+
+
+
+
+#KONTRAKO EGITURA - Egiptoko presidente Hosni Mubarak
+
+#pertsonak
+MAP (]PER_APOS1_ENTI_ATZE) TARGET  (ENTI_PER) IF  (-1 IZE + ARR) (-1C NEXT_KM) (-2 NEXT_IZLG);
+
+
+MAP (]PER_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (-2 IZE + ARR) (-2C NEXT_KM) (-3 NEXT_IZLG);
+
+
+#lekuak
+MAP (]LOC_APOS1_ENTI_ATZE) TARGET  (ENTI_LOC) IF  (-1 IZE + ARR) (-1C NEXT_KM) (-2 NEXT_IZLG);
+
+
+MAP (]LOC_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_LOC) IF (-1 ENTI_HAS_LOC) (-2 IZE + ARR) (-2C NEXT_KM) (-3 NEXT_IZLG);
+
+#erakundeak
+
+
+MAP (]ORG_APOS1_ENTI_ATZE) TARGET  (ENTI_ORG) IF  (-1 IZE + ARR) (-1C NEXT_KM) (-2 NEXT_IZLG);
+
+
+MAP (]ORG_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_ORG) IF (-1 ENTI_HAS_ORG) (-2 IZE + ARR) (-2C NEXT_KM) (-3 NEXT_IZLG);
+
+
+# HITZ ELKARTUAK egiptoko atzerri ministro amro
+#pertsonak
+MAP (]PER_APOS1_ENTI_ATZE) TARGET  (ENTI_PER) IF (-1 IZE + ARR) (-2 IZE + ARR) (-3 NEXT_IZLG); 
+
+MAP (]PER_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_PER) IF (-1 ENTI_HAS_PER) (-2 IZE + ARR) (-3 IZE + ARR) (-4 NEXT_IZLG);
+
+
+
+# lekuak
+
+MAP (]LOC_APOS1_ENTI_ATZE) TARGET  (ENTI_LOC) IF (-1 IZE + ARR) (-2 IZE + ARR) (-3 NEXT_IZLG); 
+
+MAP (]LOC_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_LOC) IF (-1 ENTI_HAS_LOC) (-2 IZE + ARR) (-3 IZE + ARR) (-4 NEXT_IZLG);
+
+
+
+#erakunduak
+
+MAP (]ORG_APOS1_ENTI_ATZE) TARGET  (ENTI_ORG) IF (-1 IZE + ARR) (-2 IZE + ARR) (-3 NEXT_IZLG); 
+
+MAP (]ORG_APOS1_ENTI_ATZE) TARGET (ENTI_BUK_ORG) IF (-1 ENTI_HAS_ORG) (-2 IZE + ARR) (-3 IZE + ARR) (-4 NEXT_IZLG);
+
+
+
+# bruselan (belgika) egitura harrapatzeko -> brusela belgikan dago sortzeko
+
+MAP ( ]APOS1_EGON) TARGET  (ENTI_LOC) IF (0C LIB) (0 INE OR ALA) (1 BEREIZ) (2C LIB);
+
+
+END
